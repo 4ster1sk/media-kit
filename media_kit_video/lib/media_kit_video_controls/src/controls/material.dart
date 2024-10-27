@@ -11,7 +11,6 @@ import 'package:media_kit_video/media_kit_video.dart';
 import 'package:media_kit_video/media_kit_video_controls/src/controls/extensions/duration.dart';
 import 'package:media_kit_video/media_kit_video_controls/src/controls/methods/video_state.dart';
 import 'package:media_kit_video/media_kit_video_controls/src/controls/widgets/video_controls_theme_data_injector.dart';
-import 'package:screen_brightness/screen_brightness.dart';
 import 'package:volume_controller/volume_controller.dart';
 
 /// {@template material_video_controls}
@@ -43,7 +42,7 @@ const kDefaultMaterialVideoControlsThemeDataFullscreen =
   automaticallyImplySkipNextButton: true,
   automaticallyImplySkipPreviousButton: true,
   volumeGesture: true,
-  brightnessGesture: true,
+  brightnessGesture: false,
   seekGesture: true,
   gesturesEnabledWhileControlsVisible: true,
   seekOnDoubleTap: true,
@@ -615,14 +614,6 @@ class _MaterialVideoControlsState extends State<_MaterialVideoControls> {
     for (final subscription in subscriptions) {
       subscription.cancel();
     }
-    // --------------------------------------------------
-    // package:screen_brightness
-    Future.microtask(() async {
-      try {
-        await ScreenBrightness().resetScreenBrightness();
-      } catch (_) {}
-    });
-    // --------------------------------------------------
     _timerSeekBackwardButton?.cancel();
     _timerSeekForwardButton?.cancel();
     super.dispose();
@@ -800,22 +791,6 @@ class _MaterialVideoControlsState extends State<_MaterialVideoControls> {
         });
       } catch (_) {}
     });
-    // --------------------------------------------------
-    // --------------------------------------------------
-    // package:screen_brightness
-    Future.microtask(() async {
-      try {
-        _brightnessValue = await ScreenBrightness().current;
-        ScreenBrightness().onCurrentBrightnessChanged.listen((value) {
-          if (mounted) {
-            setState(() {
-              _brightnessValue = value;
-            });
-          }
-        });
-      } catch (_) {}
-    });
-    // --------------------------------------------------
   }
 
   Future<void> setVolume(double value) async {
@@ -842,23 +817,6 @@ class _MaterialVideoControlsState extends State<_MaterialVideoControls> {
   }
 
   Future<void> setBrightness(double value) async {
-    // --------------------------------------------------
-    // package:screen_brightness
-    try {
-      await ScreenBrightness().setScreenBrightness(value);
-    } catch (_) {}
-    setState(() {
-      _brightnessIndicator = true;
-    });
-    _brightnessTimer?.cancel();
-    _brightnessTimer = Timer(const Duration(milliseconds: 200), () {
-      if (mounted) {
-        setState(() {
-          _brightnessIndicator = false;
-        });
-      }
-    });
-    // --------------------------------------------------
   }
 
   @override
