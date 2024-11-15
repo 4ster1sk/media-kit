@@ -1100,9 +1100,7 @@ class _MaterialVideoControlsState extends State<_MaterialVideoControls> {
                               }
                               return const SizedBox.shrink();
                             },
-                            child: const CircularProgressIndicator(
-                              color: Color(0xFFFFFFFF),
-                            ),
+                            child: const CircularProgressIndicator.adaptive(),
                           ),
                         ),
                       ),
