@@ -842,9 +842,8 @@ class _MaterialDesktopVideoControlsState
                                         }
                                         return const SizedBox.shrink();
                                       },
-                                      child: const CircularProgressIndicator(
-                                        color: Color(0xFFFFFFFF),
-                                      ),
+                                      child: const CircularProgressIndicator
+                                          .adaptive(),
                                     ),
                                   ),
                                 ),
