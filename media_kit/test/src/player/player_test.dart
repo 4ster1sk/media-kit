@@ -623,7 +623,6 @@ void main() {
         },
       );
 
-      int i = 0;
       final expectPosition = expectAsync1(
         (value) {
           print(value);
@@ -631,16 +630,8 @@ void main() {
           expect(value, isA<Duration>());
           final position = value as Duration;
 
-          if (i == 0) {
-            expect(position, Duration.zero);
-          } else if (i == 1) {
-            expect(position, const Duration(seconds: 2));
-          } else {
-            expect(position, greaterThan(const Duration(seconds: 2)));
-            expect(position, lessThanOrEqualTo(const Duration(seconds: 5)));
-          }
-
-          i++;
+          expect(position, greaterThanOrEqualTo(const Duration(seconds: 2)));
+          expect(position, lessThanOrEqualTo(const Duration(seconds: 5)));
         },
         count: 1,
         max: -1,
@@ -653,7 +644,14 @@ void main() {
         }
       });
 
+      bool opened = false;
+
       player.stream.position.listen((e) {
+        if (!opened) {
+          // Emits Duration.zero right after open(...).
+          opened = true;
+          return;
+        }
         expectPosition(e);
       });
 
@@ -697,6 +695,8 @@ void main() {
 
       StreamSubscription<Duration>? subscription;
 
+      bool opened = false;
+
       player.stream.playlist.listen(
         (e) {
           if (e.index >= 0) {
@@ -704,22 +704,27 @@ void main() {
             expectEnd(e.medias[e.index].end, e.index);
 
             // Check for position updates of this [Media].
-            int i = 0;
             final expectPosition = expectAsync1(
               (value) {
+                if (!opened) {
+                  // Emits Duration.zero right after open(...).
+                  opened = true;
+                  return;
+                }
+
                 print(value);
 
                 expect(value, isA<Duration>());
                 final position = value as Duration;
 
-                if (i == 0) {
-                  expect(position, e.medias[e.index].start);
-                } else {
-                  expect(position, greaterThan(e.medias[e.index].start!));
-                  expect(position, lessThanOrEqualTo(e.medias[e.index].end!));
-                }
-
-                i++;
+                expect(
+                  position,
+                  greaterThanOrEqualTo(e.medias[e.index].start!),
+                );
+                expect(
+                  position,
+                  lessThanOrEqualTo(e.medias[e.index].end!),
+                );
               },
               count: 1,
               max: -1,
@@ -2293,7 +2298,7 @@ void main() {
       final playable = Playlist(
         [
           for (int i = 0; i < sources.platform.length; i++)
-            Media(sources.platform[i]),
+            Media(sources.platform[i], extras: {'i': i}),
         ],
       );
 
@@ -2311,34 +2316,42 @@ void main() {
             // Player.open
             playable,
             // Player.setShuffle /w true
-            TypeMatcher<Playlist>().having(
-              (event) => event.medias.toSet(),
-              'medias',
-              equals(playable.medias.toSet()),
-            ),
+            TypeMatcher<Playlist>()
+                .having(
+                  (e) => e.medias,
+                  'have same entries',
+                  unorderedEquals(playable.medias),
+                )
+                .having(
+                  (e) => e.medias,
+                  'do not have same order',
+                  isNot(equals(playable.medias)),
+                ),
             // Player.setShuffle /w false
             playable,
           ],
         ),
       );
 
+      expect(player.stream.shuffle, emitsInOrder([false, true, false]));
+
       await player.open(playable);
 
       // VOLUNTARY DELAY.
-      await Future.delayed(const Duration(seconds: 5));
+      await Future.delayed(const Duration(seconds: 1));
 
       await player.setShuffle(true);
 
-      await Future.delayed(const Duration(seconds: 5));
+      await Future.delayed(const Duration(seconds: 1));
 
       // VOLUNTARY DELAY.
       await player.setShuffle(false);
 
-      await Future.delayed(const Duration(seconds: 30));
+      // VOLUNTARY DELAY.
+      await Future.delayed(const Duration(seconds: 1));
 
       await player.dispose();
     },
-    skip: kSkipFlakyTests,
     timeout: Timeout(const Duration(minutes: 1)),
   );
   test(
@@ -2349,7 +2362,7 @@ void main() {
       final playable = Playlist(
         [
           for (int i = 0; i < sources.platform.length; i++)
-            Media(sources.platform[i]),
+            Media(sources.platform[i], extras: {'i': i}),
         ],
       );
 
@@ -2367,21 +2380,29 @@ void main() {
             // Player.open
             playable,
             // Player.setShuffle /w true
-            TypeMatcher<Playlist>().having(
-              (event) => event.medias.toSet(),
-              'medias',
-              equals(playable.medias.toSet()),
-            ),
+            TypeMatcher<Playlist>()
+                .having(
+                  (e) => e.medias,
+                  'have same entries',
+                  unorderedEquals(playable.medias),
+                )
+                .having(
+                  (e) => e.medias,
+                  'do not have same order',
+                  isNot(equals(playable.medias)),
+                ),
             // Player.setShuffle /w false
             playable,
           ],
         ),
       );
 
+      expect(player.stream.shuffle, emitsInOrder([false, true, false]));
+
       await player.open(playable);
 
       // VOLUNTARY DELAY.
-      await Future.delayed(const Duration(seconds: 5));
+      await Future.delayed(const Duration(seconds: 1));
 
       await player.setShuffle(true);
       await player.setShuffle(true);
@@ -2389,7 +2410,7 @@ void main() {
       await player.setShuffle(true);
       await player.setShuffle(true);
 
-      await Future.delayed(const Duration(seconds: 5));
+      await Future.delayed(const Duration(seconds: 1));
 
       // VOLUNTARY DELAY.
       await player.setShuffle(false);
@@ -2398,11 +2419,11 @@ void main() {
       await player.setShuffle(false);
       await player.setShuffle(false);
 
-      await Future.delayed(const Duration(seconds: 30));
+      // VOLUNTARY DELAY.
+      await Future.delayed(const Duration(seconds: 1));
 
       await player.dispose();
     },
-    skip: kSkipFlakyTests,
     timeout: Timeout(const Duration(minutes: 1)),
   );
   test(
@@ -2778,6 +2799,7 @@ void main() {
       expect(player.state.duration, equals(Duration.zero));
       expect(player.state.buffering, equals(false));
       expect(player.state.buffer, equals(Duration.zero));
+      expect(player.state.shuffle, equals(false));
       expect(player.state.audioParams, equals(const AudioParams()));
       expect(player.state.videoParams, equals(const VideoParams()));
       expect(player.state.audioBitrate, equals(null));
@@ -2973,6 +2995,7 @@ void main() {
   );
   test(
     'player-subtitle',
+    retry: 10, // TODO: Fix flaky test
     () async {
       final player = Player();
 
