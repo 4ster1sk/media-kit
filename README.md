@@ -472,6 +472,7 @@ The following state(s) are available as events:
 | `Stream<bool>`              | `buffering`    | Whether buffering or not.                                                                                |
 | `Stream<Duration>`          | `buffer`       | Current buffer position. This indicates how much of the stream has been decoded & cached by the demuxer. |
 | `Stream<PlaylistMode>`      | `playlistMode` | Current playlist mode.                                                                                   |
+| `Stream<bool>`              | `shuffle`      | Whether playlist is shuffled or not.
 | `Stream<AudioParams>`       | `audioParams`  | Audio parameters of the currently playing media source e.g. sample rate, channels, etc.                  |
 | `Stream<VideoParams>`       | `videoParams`  | Video parameters of the currently playing media source e.g. width, height, rotation etc.                 |
 | `Stream<double?>`           | `audioBitrate` | Audio bitrate of the currently playing media source.                                                     |
@@ -1681,6 +1682,21 @@ This is as simple as [adding one line to `linux/CMakeLists.txt`](https://github.
 
 ```cmake
 target_link_libraries(${BINARY_NAME} PRIVATE ${MIMALLOC_LIB})
+```
+
+In case you prefer dynamic linking of mimalloc, you can additionally add the following line to your `linux/CMakeLists.txt`:
+
+```cmake
+# use dynamically linked mimalloc
+set(MIMALLOC_USE_STATIC_LIBS OFF)
+```
+
+In this case, please ensure you install `libmimalloc-dev` at compile time and `libmimalloc2.0` as runtime dependencies.
+
+#### Ubuntu/Debian
+
+```bash
+sudo apt install libmimalloc-dev libmimalloc2.0
 ```
 
 ### Web
