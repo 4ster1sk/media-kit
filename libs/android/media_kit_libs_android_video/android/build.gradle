@@ -58,10 +58,9 @@ task downloadDependencies(type: Exec) {
 
         // Download all *.jar dependencies & verify their MD5 checksums.
         def filesToDownload = [
-            ["url": "https://github.com/media-kit/libmpv-android-video-build/releases/download/v1.1.5/default-arm64-v8a.jar", "md5": "5f521b08692d7fef73c5df9bcc00ca4d", "destination": file("$buildDir/v1.1.5/default-arm64-v8a.jar")],
-            ["url": "https://github.com/media-kit/libmpv-android-video-build/releases/download/v1.1.5/default-armeabi-v7a.jar", "md5": "08d500ca1116c13e9c1296cc6f2207b0", "destination": file("$buildDir/v1.1.5/default-armeabi-v7a.jar")],
-            ["url": "https://github.com/media-kit/libmpv-android-video-build/releases/download/v1.1.5/default-x86_64.jar", "md5": "0880d5fbc3ff0053409704617f54cb55", "destination": file("$buildDir/v1.1.5/default-x86_64.jar")],
-            ["url": "https://github.com/media-kit/libmpv-android-video-build/releases/download/v1.1.5/default-x86.jar", "md5": "f6f51aa42b30d747099506cdc3277352", "destination": file("$buildDir/v1.1.5/default-x86.jar")]
+            ["url": "https://github.com/4ster1sk/libmpv-android-video-build/releases/download/v1.1.5-16kb/default-arm64-v8a.jar", "md5": "aeca9d4c1786b0571292dc8c582368e1", "destination": file("$buildDir/v1.1.5-16kb/default-arm64-v8a.jar")],
+            ["url": "https://github.com/4ster1sk/libmpv-android-video-build/releases/download/v1.1.5-16kb/default-armeabi-v7a.jar", "md5": "b5967802519b4352b78ef5903fa28f5d", "destination": file("$buildDir/v1.1.5-16kb/default-armeabi-v7a.jar")],
+            ["url": "https://github.com/4ster1sk/libmpv-android-video-build/releases/download/v1.1.5-16kb/default-x86_64.jar", "md5": "9c4aec51e13a364e4aee081b32b8f8a4", "destination": file("$buildDir/v1.1.5-16kb/default-x86_64.jar")],
         ]
 
         filesToDownload.each { fileInfo ->
